@@ -132,12 +132,19 @@ struct GladeView: View {
             let phase = timeline.date.timeIntervalSince(phaseStart)
             Canvas { ctx, size in
                 let daylight = store.daylight
+                let sillY = size.height * 0.9
+                let fmt = DateFormatter()
+                fmt.dateFormat = "yyyy-MM-dd"
+                fmt.locale = Locale(identifier: "en_US_POSIX")
+                let daySeed = UInt64(abs(fmt.string(from: Date()).hashValue % 100000))
+                var weatherRng = GladeSeededRandom(seed: daySeed)
+                let rainy = weatherRng.next() < 0.3
                 let sky = Path(roundedRect: CGRect(origin: .zero, size: size), cornerRadius: 20)
-                let dayTop = GladeTheme.skyDay
+                let dayTop = rainy ? Color(red: 0.58, green: 0.64, blue: 0.66) : GladeTheme.skyDay
                 let nightTop = GladeTheme.skyNight
                 let top = blendColor(nightTop, dayTop, daylight)
                 ctx.fill(sky, with: .linearGradient(Gradient(colors: [top, GladeTheme.cream.opacity(0.9)]), startPoint: .zero, endPoint: CGPoint(x: 0, y: size.height)))
-                if daylight < 0.35 {
+                if daylight < 0.35 && !rainy {
                     var rng = GladeSeededRandom(seed: 9)
                     for _ in 0..<24 {
                         let x = rng.next() * size.width
@@ -145,13 +152,87 @@ struct GladeView: View {
                         let tw = 0.5 + 0.5 * sin(phase * (1 + Double(rng.next())) + Double(rng.next()) * 6)
                         ctx.fill(Path(ellipseIn: CGRect(x: x, y: y, width: 2, height: 2)), with: .color(Color.white.opacity((0.25 + Double(rng.next()) * 0.4) * (1 - daylight) * tw)))
                     }
+                    let moonC = CGPoint(x: size.width * 0.82, y: size.height * 0.16)
+                    let moonR: CGFloat = size.width * 0.045
+                    ctx.fill(Path(ellipseIn: CGRect(x: moonC.x - moonR * 2.2, y: moonC.y - moonR * 2.2, width: moonR * 4.4, height: moonR * 4.4)), with: .radialGradient(Gradient(colors: [Color(red: 0.95, green: 0.94, blue: 0.82).opacity(0.25 * (1 - daylight)), .clear]), center: moonC, startRadius: 0, endRadius: moonR * 2.2))
+                    ctx.fill(Path(ellipseIn: CGRect(x: moonC.x - moonR, y: moonC.y - moonR, width: moonR * 2, height: moonR * 2)), with: .color(Color(red: 0.95, green: 0.94, blue: 0.84).opacity(0.9 * (1 - daylight))))
+                    ctx.fill(Path(ellipseIn: CGRect(x: moonC.x - moonR * 1.45, y: moonC.y - moonR * 0.75, width: moonR * 1.9, height: moonR * 1.9)), with: .color(top.opacity(0.92 * (1 - daylight))))
                 }
-                let sillY = size.height * 0.9
+                if rainy {
+                    var rainRng = GladeSeededRandom(seed: daySeed &+ 4)
+                    for i in 0..<22 {
+                        let x0 = rainRng.next() * size.width
+                        let speed = 0.05 + Double(rainRng.next()) * 0.05
+                        let t = CGFloat((phase * speed + Double(rainRng.next())).truncatingRemainder(dividingBy: 1))
+                        let y = t * sillY
+                        var drop = Path()
+                        drop.move(to: CGPoint(x: x0 + CGFloat(i % 3), y: y - 14))
+                        drop.addLine(to: CGPoint(x: x0, y: y))
+                        ctx.stroke(drop, with: .color(Color.white.opacity(0.30)), lineWidth: 1.4)
+                        ctx.fill(Path(ellipseIn: CGRect(x: x0 - 1.6, y: y - 2, width: 3.2, height: 4.4)), with: .color(Color.white.opacity(0.38)))
+                    }
+                    for k in 0..<3 {
+                        var trickle = Path()
+                        let tx = size.width * (0.2 + CGFloat(k) * 0.3) + CGFloat(sin(phase * 0.1 + Double(k))) * 8
+                        trickle.move(to: CGPoint(x: tx, y: 0))
+                        trickle.addQuadCurve(to: CGPoint(x: tx + 6, y: sillY * 0.7), control: CGPoint(x: tx - 8, y: sillY * 0.35))
+                        ctx.stroke(trickle, with: .color(Color.white.opacity(0.13)), lineWidth: 2)
+                    }
+                }
+                let frameW = size.width * 0.045
+                let mullionW = size.width * 0.018
+                let frameColor = GladeTheme.soil
+                let frameLight = GladeTheme.soilLight
+                var mullions = Path()
+                mullions.addRect(CGRect(x: size.width * 0.47, y: 0, width: mullionW, height: sillY))
+                mullions.addRect(CGRect(x: 0, y: sillY * 0.44, width: size.width, height: mullionW))
+                ctx.fill(mullions, with: .color(frameColor.opacity(0.9)))
+                var mullionHi = Path()
+                mullionHi.addRect(CGRect(x: size.width * 0.47 + mullionW - 2.5, y: 0, width: 2.5, height: sillY))
+                mullionHi.addRect(CGRect(x: 0, y: sillY * 0.44 + mullionW - 2.5, width: size.width, height: 2.5))
+                ctx.fill(mullionHi, with: .color(frameLight.opacity(0.5)))
+                var frame = Path()
+                frame.addRect(CGRect(x: 0, y: 0, width: frameW, height: sillY))
+                frame.addRect(CGRect(x: size.width - frameW, y: 0, width: frameW, height: sillY))
+                frame.addRect(CGRect(x: 0, y: 0, width: size.width, height: frameW * 0.7))
+                ctx.fill(frame, with: .color(frameColor))
+                ctx.fill(Path(CGRect(x: frameW - 3, y: 0, width: 3, height: sillY)), with: .color(frameLight.opacity(0.5)))
+                ctx.fill(Path(CGRect(x: size.width - frameW, y: 0, width: 3, height: sillY)), with: .color(GladeTheme.ink.opacity(0.25)))
+                let curtainW = size.width * 0.13
+                var curtain = Path()
+                curtain.move(to: CGPoint(x: 0, y: 0))
+                curtain.addLine(to: CGPoint(x: curtainW, y: 0))
+                curtain.addQuadCurve(to: CGPoint(x: curtainW * 0.55, y: sillY * 0.55), control: CGPoint(x: curtainW * 1.1, y: sillY * 0.3))
+                curtain.addQuadCurve(to: CGPoint(x: curtainW * 0.8, y: sillY), control: CGPoint(x: curtainW * 0.3, y: sillY * 0.82))
+                curtain.addLine(to: CGPoint(x: 0, y: sillY))
+                curtain.closeSubpath()
+                ctx.fill(curtain, with: .linearGradient(Gradient(colors: [Color(red: 0.91, green: 0.88, blue: 0.79), Color(red: 0.80, green: 0.76, blue: 0.66)]), startPoint: .zero, endPoint: CGPoint(x: curtainW, y: 0)))
+                for f in 0..<3 {
+                    var fold = Path()
+                    let fx = curtainW * (0.25 + CGFloat(f) * 0.24)
+                    fold.move(to: CGPoint(x: fx, y: 0))
+                    fold.addQuadCurve(to: CGPoint(x: fx * 0.75, y: sillY * 0.72), control: CGPoint(x: fx * 1.12, y: sillY * 0.4))
+                    ctx.stroke(fold, with: .color(GladeTheme.ink.opacity(0.10)), lineWidth: 3)
+                }
                 ctx.fill(Path(CGRect(x: 0, y: sillY, width: size.width, height: size.height - sillY)), with: .color(GladeTheme.soilLight))
                 ctx.fill(Path(CGRect(x: 0, y: sillY, width: size.width, height: 4)), with: .color(GladeTheme.soil.opacity(0.6)))
                 let jarRect = CGRect(x: size.width * 0.18, y: size.height * 0.06, width: size.width * 0.64, height: sillY - size.height * 0.08)
                 var inner = ctx
                 JarArtist.drawJar(&inner, rect: jarRect, jar: store.jar, phase: phase, daylight: daylight)
+                if daylight < 0.3 && !rainy {
+                    var flyRng = GladeSeededRandom(seed: 33)
+                    for f in 0..<5 {
+                        let ox = 0.12 + flyRng.next() * 0.76
+                        let oy = 0.2 + flyRng.next() * 0.55
+                        let sp = 0.3 + Double(flyRng.next()) * 0.4
+                        let fx = size.width * ox + CGFloat(sin(phase * sp + Double(f) * 1.7)) * size.width * 0.08
+                        let fy = size.height * oy + CGFloat(sin(phase * sp * 1.6 + Double(f) * 2.3)) * size.height * 0.06
+                        let pulse = 0.4 + 0.6 * abs(sin(phase * (0.8 + sp) + Double(f)))
+                        let glowColor = Color(red: 0.85, green: 0.95, blue: 0.45)
+                        ctx.fill(Path(ellipseIn: CGRect(x: fx - 7, y: fy - 7, width: 14, height: 14)), with: .radialGradient(Gradient(colors: [glowColor.opacity(0.35 * pulse * (1 - daylight)), .clear]), center: CGPoint(x: fx, y: fy), startRadius: 0, endRadius: 8))
+                        ctx.fill(Path(ellipseIn: CGRect(x: fx - 1.6, y: fy - 1.6, width: 3.2, height: 3.2)), with: .color(glowColor.opacity(0.9 * pulse * (1 - daylight))))
+                    }
+                }
             }
             .frame(height: 380)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
