@@ -28,6 +28,8 @@
 		SG0000000000000000000119 /* QuizViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = SG0000000000000000000019 /* QuizViews.swift */; };
 		SG0000000000000000000125 /* JarEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = SG0000000000000000000025 /* JarEvents.swift */; };
 		SG0000000000000000000126 /* GladeNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = SG0000000000000000000026 /* GladeNotes.swift */; };
+		SG0000000000000000000127 /* GladeWebPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = SG0000000000000000000027 /* GladeWebPanel.swift */; };
+		SG0000000000000000000128 /* GladeOpeningScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = SG0000000000000000000028 /* GladeOpeningScreen.swift */; };
 		SG0000000000000000000120 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = SG0000000000000000000020 /* Assets.xcassets */; };
 		SG0000000000000000000121 /* Art in Resources */ = {isa = PBXBuildFile; fileRef = SG0000000000000000000021 /* Art */; };
 /* End PBXBuildFile section */
@@ -54,6 +56,8 @@
 		SG0000000000000000000019 /* QuizViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizViews.swift; sourceTree = "<group>"; };
 		SG0000000000000000000025 /* JarEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JarEvents.swift; sourceTree = "<group>"; };
 		SG0000000000000000000026 /* GladeNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GladeNotes.swift; sourceTree = "<group>"; };
+		SG0000000000000000000027 /* GladeWebPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GladeWebPanel.swift; sourceTree = "<group>"; };
+		SG0000000000000000000028 /* GladeOpeningScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GladeOpeningScreen.swift; sourceTree = "<group>"; };
 		SG0000000000000000000020 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		SG0000000000000000000021 /* Art */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Art; sourceTree = "<group>"; };
 		SG0000000000000000000022 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -103,6 +107,8 @@
 				SG0000000000000000000019 /* QuizViews.swift */,
 				SG0000000000000000000025 /* JarEvents.swift */,
 				SG0000000000000000000026 /* GladeNotes.swift */,
+				SG0000000000000000000027 /* GladeWebPanel.swift */,
+				SG0000000000000000000028 /* GladeOpeningScreen.swift */,
 				SG0000000000000000000020 /* Assets.xcassets */,
 				SG0000000000000000000021 /* Art */,
 				SG0000000000000000000022 /* Info.plist */,
@@ -209,6 +215,8 @@
 				SG0000000000000000000119 /* QuizViews.swift in Sources */,
 				SG0000000000000000000125 /* JarEvents.swift in Sources */,
 				SG0000000000000000000126 /* GladeNotes.swift in Sources */,
+				SG0000000000000000000127 /* GladeWebPanel.swift in Sources */,
+				SG0000000000000000000128 /* GladeOpeningScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

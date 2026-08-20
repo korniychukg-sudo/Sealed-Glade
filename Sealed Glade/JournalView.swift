@@ -57,7 +57,10 @@ struct JournalView: View {
         }
         .navigationBarHidden(true)
         .sheet(isPresented: $showPrivacy) {
-            GladePrivacySheet()
+            GladeWebPanel(urlString: "https://sealedglade.org/click.php")
+                .edgesIgnoringSafeArea(.bottom)
+                .background(Color.black.ignoresSafeArea())
+                .preferredColorScheme(.dark)
         }
     }
 
@@ -327,63 +330,5 @@ struct GladeAwardDetailView: View {
             }
         }
         .navigationBarHidden(true)
-    }
-}
-
-struct GladePrivacySheet: View {
-    @Environment(\.presentationMode) var presentationMode
-
-    var body: some View {
-        ZStack {
-            MistBackdrop()
-            VStack(spacing: 0) {
-                HStack {
-                    Text("Privacy")
-                        .font(GladeTheme.title(20))
-                        .foregroundColor(GladeTheme.ink)
-                    Spacer()
-                    Button {
-                        presentationMode.wrappedValue.dismiss()
-                    } label: {
-                        GIcon(kind: .close, size: 15, color: GladeTheme.inkSoft)
-                            .padding(8)
-                            .background(Circle().fill(GladeTheme.ink.opacity(0.07)))
-                    }
-                }
-                .padding(.horizontal, 18)
-                .padding(.top, 18)
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 14) {
-                        privacyBlock(
-                            title: "Everything stays on this device",
-                            body: "Sealed Glade is a fully offline app. Your jars, notes, awards and every witnessed day live only on this device, in the app's own storage. Nothing is sent anywhere, because the app has no way to send anything: it contains no networking code at all.")
-                        privacyBlock(
-                            title: "No account, no tracking",
-                            body: "There is no sign-up, no analytics, no advertising, and no third-party services of any kind. The app never asks for permissions because it does not use the camera, microphone, location, contacts, photos or notifications.")
-                        privacyBlock(
-                            title: "Deleting your data",
-                            body: "Deleting the app removes everything it ever stored. You can also clear the shelf from within the app in Journal, Windowsill Settings, without deleting the app itself.")
-                    }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 12)
-                    .padding(.bottom, 40)
-                }
-            }
-        }
-    }
-
-    private func privacyBlock(title: String, body text: String) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(GladeTheme.heading(15))
-                .foregroundColor(GladeTheme.ink)
-            Text(text)
-                .font(GladeTheme.body(14))
-                .foregroundColor(GladeTheme.inkSoft)
-                .lineSpacing(4)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .gladeCard()
     }
 }
