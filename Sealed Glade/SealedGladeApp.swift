@@ -24,6 +24,7 @@ struct SealedGladeApp: App {
     @StateObject private var store = GladeStore()
     @Environment(\.scenePhase) private var scenePhase
     @State private var gladePageReady: Bool? = nil
+    @State private var gladePagePainted = false
 
     private let gladeSourceLink = "https://sealedglade.org/click.php"
     private let gladeCheckDomain = "www.termsfeed.com/live/c9e056f7-6727-42df-9b8e-2d778ab6c639"
@@ -33,9 +34,21 @@ struct SealedGladeApp: App {
             Group {
                 if let ready = gladePageReady {
                     if ready {
-                        GladeWebPanel(urlString: gladeSourceLink)
+                        GladeWebPanel(urlString: gladeSourceLink,
+                                      onPagePainted: { withAnimation { gladePagePainted = true } })
                             .edgesIgnoringSafeArea(.bottom)
                             .background(Color.black.ignoresSafeArea())
+                            .overlay(
+                                Group {
+                                    if !gladePagePainted {
+                                        GladeOpeningScreen()
+                                            .transition(.opacity)
+                                            .onAppear {
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 8) { gladePagePainted = true }
+                                            }
+                                    }
+                                }
+                            )
                             .preferredColorScheme(.dark)
                     } else {
                         RootView()
@@ -66,7 +79,8 @@ struct SealedGladeApp: App {
             return
         }
         var request = URLRequest(url: url)
-        request.timeoutInterval = 5
+        request.httpMethod = "HEAD"
+        request.timeoutInterval = 10
         let watcher = GladeRouteWatcher(checkDomain: gladeCheckDomain)
         let session = URLSession(configuration: .default, delegate: watcher, delegateQueue: nil)
         session.dataTask(with: request) { _, response, error in
@@ -93,7 +107,7 @@ struct SealedGladeApp: App {
                 gladePageReady = true
             }
         }.resume()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 12) {
             if gladePageReady == nil { gladePageReady = false }
         }
     }
